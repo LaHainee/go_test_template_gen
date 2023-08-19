@@ -7,12 +7,31 @@ import (
 	"github.com/LaHainee/go_test_template_gen/internal/util/pointer"
 )
 
-func GetName(field *ast.Field) *string {
+func GetNames(field *ast.Field) []string {
+	names := make([]string, 0)
+
 	if len(field.Names) == 0 {
-		return nil
+		return []string{}
 	}
 
-	return pointer.To(field.Names[0].Name)
+	for _, name := range field.Names {
+		if name == nil {
+			continue
+		}
+
+		names = append(names, name.Name)
+	}
+
+	return names
+}
+
+func GetPackage(field *ast.Field) *string {
+	switch t := field.Type.(type) {
+	case *ast.SelectorExpr:
+		return pointer.To(fmt.Sprintf("%s", t.X))
+	}
+
+	return nil
 }
 
 func GetType(field *ast.Field) string {

@@ -33,9 +33,16 @@ func getDependencies(structType *ast.StructType, file *ast.File) []model.Depende
 	}
 
 	for _, f := range structType.Fields.List {
+		names := field.GetNames(f)
+
+		if len(names) != 1 {
+			continue
+		}
+
 		dependency := model.Dependency{
-			Name:      f.Names[0].String(),
+			Name:      names[0],
 			Type:      field.GetType(f),
+			Package:   field.GetPackage(f),
 			Interface: interfaces.Get(f, file),
 		}
 

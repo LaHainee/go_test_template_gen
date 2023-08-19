@@ -11,26 +11,35 @@ import (
 	"strings"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
+	facade "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
 	"github.com/LaHainee/go_test_template_gen/internal/util/slice"
 )
 
-type Source struct{}
+type Source struct {
+	next facade.Source
+}
 
 func NewSource() *Source {
 	return &Source{}
 }
 
-func (s *Source) Extend(filePath model.FilePath, file *ast.File) (func(file *model.File), error) {
-	pkg, err := getPackage(string(filePath), file)
+func (s *Source) SetNext(next facade.Source) {
+	s.next = next
+}
+
+func (s *Source) Extend(filePath model.FilePath, astFile *ast.File, file *model.File) error {
+	pkg, err := getPackage(string(filePath), astFile)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return func(file *model.File) {
-		file.Path = filePath
-		file.Package = pkg
-		file.Imports = file.Imports.SetProjectModuleName(pkg.ProjectModuleName)
-	}, nil
+	file.Path = filePath
+	file.Package = pkg
+
+	if s.next != nil {
+		return s.next.Extend(filePath, astFile, file)
+	}
+	return nil
 }
 
 func getPackage(filePath string, file *ast.File) (model.Package, error) {

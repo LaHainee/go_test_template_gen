@@ -15,19 +15,23 @@ func NewSource(fp fileParser) *Source {
 }
 
 func (s *Source) Get(path model.FilePath) ([]model.File, error) {
-	files := make([]model.File, 0)
-
-	sourceFile, err := s.file.Parse(path)
+	// Приходится парсить целиком директорию, поскольку объявления могут лежать в разных
+	files, err := s.file.ParseDirectory(model.FilePath(path.DirectoryPath()))
 	if err != nil {
 		return nil, err
 	}
 
-	files = append(files, sourceFile)
+	needed := make([]model.File, 0)
 
-	testFile, err := s.file.Parse(path.ToTest())
-	if err == nil {
-		files = append(files, testFile)
+	for _, file := range files {
+		if file.Path == path {
+			needed = append(needed, file)
+		}
+
+		if file.Path == path.ToTest() {
+			needed = append(needed, file)
+		}
 	}
 
-	return files, nil
+	return needed, nil
 }

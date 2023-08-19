@@ -39,7 +39,12 @@ func (path FilePath) IsGolangSource() bool {
 }
 
 func (path FilePath) DirectoryFilePaths() ([]FilePath, error) {
-	directory := filepath.Dir(path.String())
+	// Необходимо для обработки кейса, когда на path это /User/vaershov, т.е. в конце нет слеша
+	// Чтобы не вызывать os.Stat() реализовано решение с проверкой длины расширения
+	directory := path.String()
+	if len(filepath.Ext(path.String())) > 0 {
+		directory = filepath.Dir(path.String())
+	}
 
 	files, err := os.ReadDir(directory)
 	if err != nil {

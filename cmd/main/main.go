@@ -1,14 +1,13 @@
 package main
 
 import (
-	"flag"
-
 	"github.com/LaHainee/go_test_template_gen/internal/presenter"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/functions"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
 	astFile "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/file"
 	astFunctions "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions"
 	astFunctionArguments "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/arguments"
+	astFunctionImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/imports"
 	astFunctionReceiver "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/receiver"
 	astImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/imports"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/file"
@@ -23,16 +22,22 @@ import (
 )
 
 func main() {
-	path := flag.String("path", "", "Path to file or directory for test template generation")
-	flag.Parse()
+	//path := flag.String("path", "", "Path to file or directory for test template generation")
+	//flag.Parse()
 
 	functionSourceReceiver := astFunctionReceiver.NewSource()
 	functionSourceArguments := astFunctionArguments.NewSource()
+	functionSourceImports := astFunctionImports.NewSource()
+	functionSourceReceiver.SetNext(functionSourceArguments)
+	functionSourceArguments.SetNext(functionSourceImports)
 
-	sourceFunctions := astFunctions.NewSource(functionSourceReceiver, functionSourceArguments)
+	sourceFunctions := astFunctions.NewSource(functionSourceReceiver)
 	sourceImports := astImports.NewSource()
 	sourceFile := astFile.NewSource()
-	astFacade := ast.NewFacade(sourceFunctions, sourceImports, sourceFile)
+	sourceFile.SetNext(sourceImports)
+	sourceImports.SetNext(sourceFunctions)
+
+	astFacade := ast.NewFacade(sourceFile)
 
 	fileParser := file.NewParser(astFacade)
 	functionsRepo := functions.NewRepository()
@@ -55,7 +60,7 @@ func main() {
 
 	usecase := codegen.NewUseCase(filesGetter, testsPresenter, testCreateRepository)
 
-	err := usecase.Execute(*path)
+	err := usecase.Execute("/Users/vaershov/Avito-Dev/service-str-activator/internal/clients/user-limits")
 	if err != nil {
 		panic(err)
 	}
