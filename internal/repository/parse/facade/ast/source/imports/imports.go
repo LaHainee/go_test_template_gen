@@ -5,35 +5,40 @@ import (
 	"go/token"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
+	facade "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
 )
 
-type Source struct{}
+type Source struct {
+	next facade.Source
+}
 
 func NewSource() *Source {
 	return &Source{}
 }
 
-//nolint:unparam
-func (s *Source) Extend(_ model.FilePath, file *ast.File) (func(file *model.File), error) {
-	var imports model.Imports
+func (s *Source) SetNext(next facade.Source) {
+	s.next = next
+}
 
-	for _, decl := range file.Decls {
+func (s *Source) Extend(filePath model.FilePath, astFile *ast.File, file *model.File) error {
+	for _, decl := range astFile.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok || genDecl.Tok != token.IMPORT {
 			continue
 		}
 
-		imports = getImports(genDecl)
+		file.Imports = model.NewImports().Append(getImports(genDecl)...)
 		break
 	}
 
-	return func(file *model.File) {
-		file.Imports = imports
-	}, nil
+	if s.next != nil {
+		return s.next.Extend(filePath, astFile, file)
+	}
+	return nil
 }
 
-func getImports(genDecl *ast.GenDecl) model.Imports {
-	imports := model.NewImports()
+func getImports(genDecl *ast.GenDecl) []string {
+	imports := make([]string, 0)
 
 	for _, spec := range genDecl.Specs {
 		importSpec, ok := spec.(*ast.ImportSpec)
@@ -41,7 +46,7 @@ func getImports(genDecl *ast.GenDecl) model.Imports {
 			continue
 		}
 
-		imports = imports.Append(getImport(importSpec))
+		imports = append(imports, getImport(importSpec))
 	}
 
 	return imports

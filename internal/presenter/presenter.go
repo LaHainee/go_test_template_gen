@@ -56,7 +56,8 @@ func (p *Presenter) Present(files []model.File) []model.TestFile {
 }
 
 func (p *Presenter) presentFile(file model.File) (model.TestFile, error) {
-	imports := file.Imports
+	imports := model.NewImports().SetProjectModuleName(file.Package.ProjectModuleName)
+	imports = imports.Append(getSelfImport(file.Package.Path)) // селф-импорт
 
 	tests := make([]model.Test, 0, len(file.Functions))
 	for _, function := range file.Functions {
@@ -65,8 +66,8 @@ func (p *Presenter) presentFile(file model.File) (model.TestFile, error) {
 			continue
 		}
 
+		imports = imports.Append(function.NeededImports.Get()...)       // импорты, которые нужны для функции
 		imports = imports.Append(presenter.PresentImports(function)...) // импорты, которые нужны для теста
-		imports = imports.Append(getSelfImport(file.Package.Path))      // селф-импорт
 
 		tests = append(tests, getTest(function, presenter))
 	}

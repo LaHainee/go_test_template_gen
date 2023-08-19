@@ -1,26 +1,45 @@
 package functions
 
 import (
-	"errors"
 	"go/ast"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
+	facade "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
 )
 
 type Source struct {
-	sources []src
+	source SourceFunction
+	next   facade.Source
 }
 
-func NewSource(sources ...src) *Source {
+func NewSource(source SourceFunction) *Source {
 	return &Source{
-		sources: sources,
+		source: source,
 	}
 }
 
-func (s *Source) Extend(_ model.FilePath, file *ast.File) (func(file *model.File), error) {
+func (s *Source) SetNext(next facade.Source) {
+	s.next = next
+}
+
+func (s *Source) Extend(filePath model.FilePath, astFile *ast.File, file *model.File) error {
+	functions, err := s.getFunctions(astFile, file)
+	if err != nil {
+		return err
+	}
+
+	file.Functions = functions
+
+	if s.next != nil {
+		return s.next.Extend(filePath, astFile, file)
+	}
+	return nil
+}
+
+func (s *Source) getFunctions(astFile *ast.File, file *model.File) ([]model.Function, error) {
 	functions := make([]model.Function, 0)
 
-	for _, decl := range file.Decls {
+	for _, decl := range astFile.Decls {
 		funcDecl, ok := decl.(*ast.FuncDecl)
 		if !ok {
 			continue
@@ -30,36 +49,13 @@ func (s *Source) Extend(_ model.FilePath, file *ast.File) (func(file *model.File
 			Name: funcDecl.Name.Name,
 		}
 
-		for _, source := range s.sources {
-			apply, err := source.Extend(funcDecl, file)
-			if err != nil {
-				return nil, err
-			}
-
-			apply(&function)
+		err := s.source.Extend(funcDecl, astFile, file, &function)
+		if err != nil {
+			return nil, err
 		}
 
 		functions = append(functions, function)
 	}
 
-	s.setConstructorsName(functions)
-
-	return func(file *model.File) {
-		file.Functions = functions
-	}, nil
-}
-
-func (s *Source) setConstructorsName(functions []model.Function) {
-	for i, function := range functions {
-		if function.Receiver == nil {
-			continue
-		}
-
-		constructor, err := model.Functions(functions).LookupByOutputArgument(function.Receiver.Name)
-		if errors.Is(err, model.ErrNotFound) {
-			continue
-		}
-
-		functions[i].Receiver.ConstructorName = &constructor.Name
-	}
+	return functions, nil
 }

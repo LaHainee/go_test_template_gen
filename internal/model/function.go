@@ -8,6 +8,7 @@ import (
 type Function struct {
 	Name            string
 	Receiver        *Structure
+	NeededImports   Imports
 	InputArguments  []Argument
 	OutputArguments []Argument
 }
@@ -35,10 +36,13 @@ func (function Function) IsConstructor() bool {
 	return strings.HasPrefix(function.Name, "New")
 }
 
-func (functions Functions) LookupByOutputArgument(argumentName string) (Function, error) {
+// LookupByOutputArgument - найти функцию, которая возвращает аргумент с полученным типом
+func (functions Functions) LookupByOutputArgument(argumentType string) (Function, error) {
 	for _, function := range functions {
 		for _, argument := range function.OutputArguments {
-			if argument.Dereference() == argumentName {
+
+			// Аргумент может быть указателем, поэтому необходимо его разименовать
+			if argument.Dereference() == argumentType {
 				return function, nil
 			}
 		}
@@ -48,8 +52,9 @@ func (functions Functions) LookupByOutputArgument(argumentName string) (Function
 }
 
 type Argument struct {
-	Name *string
-	Type string
+	Name    *string
+	Type    string
+	Package *string
 }
 
 func (argument Argument) Dereference() string {

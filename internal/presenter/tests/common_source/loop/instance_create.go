@@ -16,9 +16,7 @@ func NewInstanceCreate() *InstanceCreate {
 
 func (s *InstanceCreate) Extend(function model.Function) func(loop *test.Loop) {
 	if function.Receiver == nil {
-		return func(loop *test.Loop) {
-			loop.InstanceCreate = nil
-		}
+		return func(loop *test.Loop) { loop.InstanceCreate = nil }
 	}
 
 	arguments := make([]string, 0)
@@ -40,7 +38,16 @@ func (s *InstanceCreate) Extend(function model.Function) func(loop *test.Loop) {
 	return func(loop *test.Loop) {
 		loop.InstanceCreate = &test.Statement{
 			Lhs: "instance",
-			Rhs: fmt.Sprintf("New%s(%s)", function.Receiver.Name, strings.Join(arguments, ", ")),
+			Rhs: fmt.Sprintf("%s(%s)", s.getConstructorName(function.Receiver), strings.Join(arguments, ", ")),
 		}
 	}
+}
+
+func (s *InstanceCreate) getConstructorName(receiver *model.Structure) string {
+	if receiver.ConstructorName != nil {
+		return *receiver.ConstructorName
+	}
+
+	// Деградация на случай пустого названия конструктора
+	return fmt.Sprintf("New%s", receiver.Name)
 }

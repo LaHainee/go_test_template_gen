@@ -32,6 +32,33 @@ func NewImports() Imports {
 	}
 }
 
+// Search - найти импорт по полученному пакету
+func (imports Imports) Search(pkg string) (string, error) {
+	importsList := imports.Get()
+
+	for _, concreteImport := range importsList {
+		// Разобьем импорт
+		parts := strings.Split(concreteImport, " ")
+
+		if len(parts) == 0 {
+			continue
+		}
+
+		// Тут будет либо алиас для импорта, например, context, либо полный путь /str-activator/internal/models
+		pathOrAlias := strings.Trim(parts[0], "\"")
+
+		if len(pathOrAlias) < len(pkg) {
+			continue
+		}
+
+		if pathOrAlias[len(pathOrAlias)-len(pkg):] == pkg {
+			return concreteImport, nil
+		}
+	}
+
+	return "", ErrNotFound
+}
+
 func (imports Imports) SetProjectModuleName(moduleName string) Imports {
 	imports.projectModuleName = moduleName
 
@@ -71,19 +98,19 @@ func (imports Imports) PresentReformatted() []string {
 	internalImports := imports.internal.Values()
 
 	if len(stdlibImports) > 0 {
-		sort.Strings(stdlibImports)
+		sort.Sort(importsSlice(stdlibImports))
 		rows = append(rows, stdlibImports...) // 1-й блок импорты из стандартной библиотеки
 		rows = append(rows, "")
 	}
 
 	if len(thirdPartyImports) > 0 {
-		sort.Strings(thirdPartyImports)
+		sort.Sort(importsSlice(thirdPartyImports))
 		rows = append(rows, thirdPartyImports...) // 2-й блок импорты внешних библиотек
 		rows = append(rows, "")
 	}
 
 	if len(internalImports) > 0 {
-		sort.Strings(internalImports)
+		sort.Sort(importsSlice(internalImports))
 		rows = append(rows, internalImports...) // 3-й блок внутренние импорты
 	}
 
@@ -131,4 +158,33 @@ func (imports Imports) isInternal(value string) bool {
 	}
 
 	return strings.Contains(value, fmt.Sprintf("\"%s/", imports.projectModuleName))
+}
+
+// Сортировка импортов
+type importsSlice []string
+
+func (s importsSlice) Len() int {
+	return len(s)
+}
+
+func (s importsSlice) Less(i, j int) bool {
+	partsI := strings.Split(s[i], " ")
+	partsJ := strings.Split(s[j], " ")
+
+	toCompareI := partsI[0]
+	toCompareJ := partsJ[0]
+
+	if len(partsI) > 1 {
+		toCompareI = partsI[1]
+	}
+
+	if len(partsJ) > 1 {
+		toCompareJ = partsJ[1]
+	}
+
+	return toCompareI < toCompareJ
+}
+
+func (s importsSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }

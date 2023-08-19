@@ -10,30 +10,26 @@ import (
 )
 
 type Facade struct {
-	sources []src
+	source Source
 }
 
-func NewFacade(sources ...src) *Facade {
+func NewFacade(source Source) *Facade {
 	return &Facade{
-		sources: sources,
+		source: source,
 	}
 }
 
 func (f *Facade) Parse(filePath model.FilePath) (model.File, error) {
-	fileAst, err := getAstFile(filePath)
+	astFile, err := getAstFile(filePath)
 	if err != nil {
 		return model.File{}, err
 	}
 
 	var file model.File
 
-	for _, source := range f.sources {
-		apply, err := source.Extend(filePath, fileAst)
-		if err != nil {
-			return model.File{}, err
-		}
-
-		apply(&file)
+	err = f.source.Extend(filePath, astFile, &file)
+	if err != nil {
+		return model.File{}, err
 	}
 
 	return file, nil
