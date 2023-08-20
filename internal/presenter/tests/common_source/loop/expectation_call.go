@@ -17,10 +17,25 @@ func NewExpectationCall() *ExpectationCall {
 func (s *ExpectationCall) Extend(function model.Function) func(loop *presenter.Loop) {
 	arguments := make([]string, 0)
 
+	// Если среди входных аргументов есть указатели, то их нужно вынести в блок expectations
+	for _, argument := range function.InputArguments {
+		// Пропускаем аргументы без указателя
+		if !argument.IsPointer() {
+			continue
+		}
+
+		// Пропускаем аргументы, которые не содержат в своем названии out
+		if !argument.NameContains("out") {
+			continue
+		}
+
+		arguments = append(arguments, fmt.Sprintf("tc.%s", *argument.Name))
+	}
+
 	var argumentsAmount int
 
 	for _, argument := range function.OutputArguments {
-		if argument.Type == model.ArgumentError {
+		if argument.Is(model.ArgumentError) {
 			arguments = append(arguments, "err")
 			continue
 		}

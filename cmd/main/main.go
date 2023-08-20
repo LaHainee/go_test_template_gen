@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/LaHainee/go_test_template_gen/internal/presenter"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/functions"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
@@ -22,8 +24,12 @@ import (
 )
 
 func main() {
-	//path := flag.String("path", "", "Path to file or directory for test template generation")
-	//flag.Parse()
+	path := flag.String("path", "", "Path to file or directory for test template generation")
+	flag.Parse()
+
+	if path == nil {
+		return
+	}
 
 	functionSourceReceiver := astFunctionReceiver.NewSource()
 	functionSourceArguments := astFunctionArguments.NewSource()
@@ -60,8 +66,5 @@ func main() {
 
 	usecase := codegen.NewUseCase(filesGetter, testsPresenter, testCreateRepository)
 
-	err := usecase.Execute("/Users/vaershov/Avito-Dev/service-str-activator/internal/clients/user-limits")
-	if err != nil {
-		panic(err)
-	}
+	_ = usecase.Execute(*path)
 }

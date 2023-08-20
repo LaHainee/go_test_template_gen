@@ -57,7 +57,16 @@ func (s *Arguments) getInputArgumentsDeclarations(function model.Function) []tes
 			continue
 		}
 
-		if argument.Type == model.ArgumentContext {
+		if argument.Is(model.ArgumentContext) {
+			continue
+		}
+
+		if argument.IsPointer() {
+			statements = append(statements, test.Statement{
+				Lhs: pointer.Val(argument.Name),
+				Rhs: argument.Dereference(),
+			})
+
 			continue
 		}
 

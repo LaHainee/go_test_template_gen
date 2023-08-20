@@ -52,6 +52,34 @@ func GetType(field *ast.Field) string {
 		return fmt.Sprintf("%s.%s", t.X, t.Sel.Name)
 	case *ast.InterfaceType:
 		return "interface{}"
+	case *ast.FuncType:
+		params := ""
+		results := ""
+
+		if t.Params != nil && len(t.Params.List) > 0 {
+			for i, param := range t.Params.List {
+				paramType := GetType(&ast.Field{Type: param.Type})
+				if i > 0 {
+					params += ", "
+				}
+				params += paramType
+			}
+		}
+
+		if t.Results != nil && len(t.Results.List) > 0 {
+			for i, result := range t.Results.List {
+				resultType := GetType(&ast.Field{Type: result.Type})
+				if i > 0 {
+					results += ", "
+				}
+				results += resultType
+			}
+		}
+
+		if len(results) == 0 {
+			return fmt.Sprintf("func(%s)", params)
+		}
+		return fmt.Sprintf("func(%s) (%s)", params, results)
 	default:
 		return ""
 	}

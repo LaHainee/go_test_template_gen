@@ -1,10 +1,5 @@
 package model
 
-const (
-	ArgumentError   = "error"
-	ArgumentContext = "context.Context"
-)
-
 type File struct {
 	Path      FilePath
 	Imports   Imports

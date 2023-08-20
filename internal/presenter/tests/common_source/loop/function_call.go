@@ -28,12 +28,17 @@ func (s *FunctionCall) getInput(function model.Function) string {
 	arguments := make([]string, 0)
 
 	for _, argument := range function.InputArguments {
-		if argument.Type == model.ArgumentContext {
+		if argument.Is(model.ArgumentContext) {
 			arguments = append(arguments, "context.Background()")
 			continue
 		}
 
-		arguments = append(arguments, fmt.Sprintf("tc.%s", pointer.Val(argument.Name)))
+		template := "tc.%s"
+		if argument.IsPointer() {
+			template = "&tc.%s"
+		}
+
+		arguments = append(arguments, fmt.Sprintf(template, pointer.Val(argument.Name)))
 	}
 
 	return strings.Join(arguments, ", ")
@@ -45,7 +50,7 @@ func (s *FunctionCall) getOutput(function model.Function) string {
 	var argumentsAmount int
 
 	for _, argument := range function.OutputArguments {
-		if argument.Type == model.ArgumentError {
+		if argument.Is(model.ArgumentError) {
 			arguments = append(arguments, "err")
 			continue
 		}
