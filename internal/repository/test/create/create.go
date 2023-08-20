@@ -30,11 +30,13 @@ func (r *Repository) Create(files []model.TestFile) error {
 }
 
 func (r *Repository) create(testFile model.TestFile) error {
-	file, err := os.OpenFile(testFile.Path, os.O_RDONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(testFile.Path, os.O_RDONLY|os.O_CREATE, 0o644)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	content, err := io.ReadAll(file)
 	if err != nil {
@@ -48,5 +50,5 @@ func (r *Repository) create(testFile model.TestFile) error {
 		return err
 	}
 
-	return os.WriteFile(testFile.Path, []byte(strings.Join(rows, "\n")), 0644)
+	return os.WriteFile(testFile.Path, []byte(strings.Join(rows, "\n")), 0o644)
 }

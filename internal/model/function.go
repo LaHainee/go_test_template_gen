@@ -40,7 +40,6 @@ func (function Function) IsConstructor() bool {
 func (functions Functions) LookupByOutputArgument(argumentType string) (Function, error) {
 	for _, function := range functions {
 		for _, argument := range function.OutputArguments {
-
 			// Аргумент может быть указателем, поэтому необходимо его разименовать
 			if argument.Dereference() == argumentType {
 				return function, nil
