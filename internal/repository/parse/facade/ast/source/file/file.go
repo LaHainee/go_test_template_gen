@@ -103,7 +103,9 @@ func getProjectModuleName(rootPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	content, err := io.ReadAll(file)
 	if err != nil {
