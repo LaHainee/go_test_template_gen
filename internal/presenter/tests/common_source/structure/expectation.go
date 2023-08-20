@@ -20,8 +20,29 @@ func (s *Expectation) Extend(function model.Function) func(structure *test.Struc
 
 	var argumentsAmount int
 
+	// Если среди входных аргументов есть указатели, то их нужно вынести в блок expectations
+	for _, argument := range function.InputArguments {
+		// Пропускаем аргументы без указателя
+		if !argument.IsPointer() {
+			continue
+		}
+
+		// Пропускаем аргументы, которые не содержат в своем названии out
+		if !argument.NameContains("out") {
+			continue
+		}
+
+		if argumentsAmount == 0 {
+			arguments = append(arguments, fmt.Sprintf("got %s", argument.Dereference()))
+		} else {
+			arguments = append(arguments, fmt.Sprintf("got%d %s", argumentsAmount, argument.Dereference()))
+		}
+
+		argumentsAmount++
+	}
+
 	for _, argument := range function.OutputArguments {
-		if argument.Type == model.ArgumentError {
+		if argument.Is(model.ArgumentError) {
 			arguments = append(arguments, "err error")
 			continue
 		}

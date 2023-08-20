@@ -68,6 +68,10 @@ func expandAstScopeToDirectory(filePath model.FilePath, source *ast.File) error 
 	scope := ast.NewScope(nil)
 
 	for _, filePath = range filePaths {
+		if !filePath.IsGolangSource() {
+			continue
+		}
+
 		file, err := parser.ParseFile(token.NewFileSet(), string(filePath), nil, parser.AllErrors)
 		if err != nil {
 			return err

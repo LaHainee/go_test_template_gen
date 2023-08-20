@@ -51,16 +51,6 @@ func (functions Functions) LookupByOutputArgument(argumentType string) (Function
 	return Function{}, ErrNotFound
 }
 
-type Argument struct {
-	Name    *string
-	Type    string
-	Package *string
-}
-
-func (argument Argument) Dereference() string {
-	return strings.TrimLeft(argument.Type, "*")
-}
-
 type Structure struct {
 	Name            string
 	ConstructorName *string
