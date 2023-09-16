@@ -18,13 +18,14 @@ func (structure *Structure) Present() string {
 
 	rows := make([]string, 0)
 
-	prepare := structure.PresentPrepare()
-
 	rows = append(rows, structure.PresentTestName())
 	rows = append(rows, structure.PresentFunctionArguments()...)
+
+	prepare := structure.PresentPrepare()
 	if prepare != nil {
 		rows = append(rows, pointer.Val(prepare))
 	}
+
 	rows = append(rows, structure.PresentExpectation())
 
 	return strings.Join(rows, "\n\t\t")

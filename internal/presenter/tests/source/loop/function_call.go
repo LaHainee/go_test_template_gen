@@ -2,6 +2,7 @@ package loop
 
 import (
 	"fmt"
+	domain "github.com/LaHainee/go_test_template_gen/internal/domain/function"
 	"strings"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
@@ -19,9 +20,20 @@ func (s *FunctionCall) Extend(function model.Function) func(loop *test.Loop) {
 	return func(loop *test.Loop) {
 		loop.FunctionCall = test.Statement{
 			Lhs: s.getOutput(function),
-			Rhs: fmt.Sprintf("instance.%s(%s)", function.Name, s.getInput(function)),
+			Rhs: s.getRhs(function),
 		}
 	}
+}
+
+func (s *FunctionCall) getRhs(function model.Function) string {
+	functionType := domain.GetFunctionType(function)
+
+	functionInput := s.getInput(function)
+
+	if functionType == domain.TypePublicFunction {
+		return fmt.Sprintf("%s(%s)", function.Name, functionInput)
+	}
+	return fmt.Sprintf("instance.%s(%s)", function.Name, functionInput)
 }
 
 func (s *FunctionCall) getInput(function model.Function) string {

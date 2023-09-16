@@ -18,15 +18,23 @@ type Loop struct {
 func (loop Loop) Present() string {
 	rows := make([]string, 0)
 
-	instanceInit := loop.PresentInstanceInit()
+	mockCreate := loop.PresentMockCreate()
+	if len(mockCreate) != 0 {
+		rows = append(rows, mockCreate...)
+		rows = append(rows, "")
+	}
 
-	rows = append(rows, loop.PresentMockCreate()...)
-	rows = append(rows, "")
-	rows = append(rows, loop.PresentMockPrepare()...)
-	rows = append(rows, "")
+	mockPrepare := loop.PresentMockPrepare()
+	if len(mockPrepare) != 0 {
+		rows = append(rows, mockPrepare...)
+		rows = append(rows, "")
+	}
+
+	instanceInit := loop.PresentInstanceInit()
 	if instanceInit != nil {
 		rows = append(rows, pointer.Val(instanceInit))
 	}
+
 	rows = append(rows, loop.PresentFunctionCall())
 	rows = append(rows, "")
 	rows = append(rows, loop.PresentExpectationCall())

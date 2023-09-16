@@ -42,11 +42,13 @@ func (g *Getter) Get(path string) ([]model.File, error) {
 			return nil, err
 		}
 
-		if len(uncoveredFunctions) == 0 {
+		functionToCover := filterFunctionToCover(uncoveredFunctions)
+
+		if len(functionToCover) == 0 {
 			continue
 		}
 
-		file.Functions = uncoveredFunctions
+		file.Functions = functionToCover
 
 		files = append(files, file)
 	}
@@ -64,6 +66,20 @@ func (g *Getter) getFiles(path string) ([]model.File, error) {
 		return g.byDirectory.Get(model.FilePath(path))
 	}
 	return g.byFilepath.Get(model.FilePath(path))
+}
+
+func filterFunctionToCover(functions []model.Function) []model.Function {
+	toCover := make([]model.Function, 0, len(functions))
+
+	for _, function := range functions {
+		if function.IsConstructor() {
+			continue
+		}
+
+		toCover = append(toCover, function)
+	}
+
+	return toCover
 }
 
 func filterFilesToCover(files []model.File) []model.File {
