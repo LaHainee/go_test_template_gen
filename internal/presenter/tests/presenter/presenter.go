@@ -1,4 +1,4 @@
-package general
+package presenter
 
 import "github.com/LaHainee/go_test_template_gen/internal/model"
 

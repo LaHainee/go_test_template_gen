@@ -1,16 +1,19 @@
 package presenter
 
 import (
+	domain "github.com/LaHainee/go_test_template_gen/internal/domain/function"
 	"github.com/LaHainee/go_test_template_gen/internal/model"
-	commonSourceLoop "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/common_source/loop"
-	commonSourceStructure "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/common_source/structure"
-	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/general"
-	generalLoop "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/general/loop"
-	generalStructure "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/general/structure"
+	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter"
+	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/loop"
+	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/structure"
+	sourceLoop "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/loop"
+	sourceStructure "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/structure"
 )
 
 type Factory struct {
-	generalPresenter TestPresenter
+	presenterMethodWithMocks    TestPresenter
+	presenterMethodWithoutMocks TestPresenter
+	presenterFunction           TestPresenter
 }
 
 func NewFactory() *Factory {
@@ -24,37 +27,88 @@ type TestPresenter interface {
 }
 
 func (f *Factory) CreateTestPresenter(function model.Function) (TestPresenter, error) {
-	if function.HasInterfaceDependencies() {
-		return f.getGeneralPresenter(), nil
+	functionType := domain.GetFunctionType(function)
+
+	switch functionType {
+	case domain.TypePublicMethodWithInterfaceDeps:
+		return f.getPresenterMethodWithMocks(), nil
+	case domain.TypePublicMethodWithoutInterfaceDeps:
+		return f.getPresenterMethodWithoutMocks(), nil
+	case domain.TypePublicFunction:
+		return f.getPresenterFunction(), nil
 	}
 
 	return nil, model.ErrUnsupported
 }
 
-func (f *Factory) getGeneralPresenter() TestPresenter {
-	if f.generalPresenter == nil {
-		f.mustInitGeneralPresenter()
+func (f *Factory) getPresenterMethodWithoutMocks() TestPresenter {
+	if f.presenterMethodWithoutMocks == nil {
+		f.mustInitPresenterMethodWithoutMocks()
 	}
 
-	return f.generalPresenter
+	return f.presenterMethodWithoutMocks
 }
 
-func (f *Factory) mustInitGeneralPresenter() {
-	presenter := general.NewPresenter(
-		generalStructure.NewPresenter(
-			commonSourceStructure.NewName(),
-			commonSourceStructure.NewArguments(),
-			commonSourceStructure.NewPrepare(),
-			commonSourceStructure.NewExpectation(),
+func (f *Factory) getPresenterMethodWithMocks() TestPresenter {
+	if f.presenterMethodWithMocks == nil {
+		f.mustInitPresenterMethodWithMocks()
+	}
+
+	return f.presenterMethodWithMocks
+}
+
+func (f *Factory) getPresenterFunction() TestPresenter {
+	if f.presenterFunction == nil {
+		f.mustInitPresenterFunction()
+	}
+
+	return f.presenterFunction
+}
+
+func (f *Factory) mustInitPresenterFunction() {
+	f.presenterFunction = presenter.NewPresenter(
+		structure.NewPresenter(
+			sourceStructure.NewName(),
+			sourceStructure.NewArguments(),
+			sourceStructure.NewExpectation(),
 		),
-		generalLoop.NewPresenter(
-			commonSourceLoop.NewMockCreate(),
-			commonSourceLoop.NewMockPrepare(),
-			commonSourceLoop.NewInstanceCreate(),
-			commonSourceLoop.NewFunctionCall(),
-			commonSourceLoop.NewExpectationCall(),
+		loop.NewPresenter(
+			sourceLoop.NewFunctionCall(),
+			sourceLoop.NewExpectationCall(),
 		),
 	)
+}
 
-	f.generalPresenter = presenter
+func (f *Factory) mustInitPresenterMethodWithoutMocks() {
+	f.presenterMethodWithoutMocks = presenter.NewPresenter(
+		structure.NewPresenter(
+			sourceStructure.NewName(),
+			sourceStructure.NewArguments(),
+			sourceStructure.NewPrepare(),
+			sourceStructure.NewExpectation(),
+		),
+		loop.NewPresenter(
+			sourceLoop.NewInstanceCreate(),
+			sourceLoop.NewFunctionCall(),
+			sourceLoop.NewExpectationCall(),
+		),
+	)
+}
+
+func (f *Factory) mustInitPresenterMethodWithMocks() {
+	f.presenterMethodWithMocks = presenter.NewPresenter(
+		structure.NewPresenter(
+			sourceStructure.NewName(),
+			sourceStructure.NewArguments(),
+			sourceStructure.NewPrepare(),
+			sourceStructure.NewExpectation(),
+		),
+		loop.NewPresenter(
+			sourceLoop.NewMockCreate(),
+			sourceLoop.NewMockPrepare(),
+			sourceLoop.NewInstanceCreate(),
+			sourceLoop.NewFunctionCall(),
+			sourceLoop.NewExpectationCall(),
+		),
+	)
 }
