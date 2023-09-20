@@ -32,6 +32,9 @@ func (g *Getter) Get(path string) ([]model.File, error) {
 	files = make([]model.File, 0)
 
 	for _, file := range filesToCover {
+		functionsToCover := filterFunctionsToCover(file.Functions)
+		file.Functions = functionsToCover
+
 		uncoveredFunctions, err := g.functions.GetUncovered(file.Functions, file.Path.ToTest())
 		if errors.Is(err, model.ErrNotFound) {
 			// файл не найден, значит его надо покрыть полностью
@@ -41,14 +44,11 @@ func (g *Getter) Get(path string) ([]model.File, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		functionToCover := filterFunctionToCover(uncoveredFunctions)
-
-		if len(functionToCover) == 0 {
+		if len(uncoveredFunctions) == 0 {
 			continue
 		}
 
-		file.Functions = functionToCover
+		file.Functions = uncoveredFunctions
 
 		files = append(files, file)
 	}
@@ -68,7 +68,7 @@ func (g *Getter) getFiles(path string) ([]model.File, error) {
 	return g.byFilepath.Get(model.FilePath(path))
 }
 
-func filterFunctionToCover(functions []model.Function) []model.Function {
+func filterFunctionsToCover(functions []model.Function) []model.Function {
 	toCover := make([]model.Function, 0, len(functions))
 
 	for _, function := range functions {
