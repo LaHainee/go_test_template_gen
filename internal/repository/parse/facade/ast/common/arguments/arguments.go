@@ -18,13 +18,13 @@ func Get(fieldList *ast.FieldList) []model.Argument {
 	for _, f := range fieldList.List {
 		fieldNames := field.GetNames(f)
 		fieldType := field.GetType(f)
-		fieldPackage := field.GetPackage(f)
+		fieldPackages := field.GetPackages(f, []string{})
 
 		// Аргументы без имен
 		if len(fieldNames) == 0 {
 			arguments = append(arguments, model.Argument{
-				Type:    fieldType,
-				Package: fieldPackage,
+				Type:     fieldType,
+				Packages: fieldPackages,
 			})
 
 			continue
@@ -32,9 +32,9 @@ func Get(fieldList *ast.FieldList) []model.Argument {
 
 		for _, name := range fieldNames {
 			arguments = append(arguments, model.Argument{
-				Name:    pointer.To(name),
-				Type:    fieldType,
-				Package: fieldPackage,
+				Name:     pointer.To(name),
+				Type:     fieldType,
+				Packages: fieldPackages,
 			})
 		}
 

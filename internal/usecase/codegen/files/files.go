@@ -72,7 +72,7 @@ func filterFunctionsToCover(functions []model.Function) []model.Function {
 	toCover := make([]model.Function, 0, len(functions))
 
 	for _, function := range functions {
-		if function.IsConstructor() {
+		if function.IsConstructor() || function.IsPrivate() {
 			continue
 		}
 

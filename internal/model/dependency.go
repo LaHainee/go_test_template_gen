@@ -10,7 +10,7 @@ var (
 type Dependency struct {
 	Name      string
 	Type      string
-	Package   *string
+	Packages  []string
 	Interface *Interface
 }
 

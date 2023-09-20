@@ -30,7 +30,7 @@ func (s *FunctionCall) getRhs(function model.Function) string {
 
 	functionInput := s.getInput(function)
 
-	if functionType == domain.TypePublicFunction {
+	if functionType == domain.TypeFunction {
 		return fmt.Sprintf("%s(%s)", function.Name, functionInput)
 	}
 	return fmt.Sprintf("instance.%s(%s)", function.Name, functionInput)
