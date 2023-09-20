@@ -30,11 +30,11 @@ func (f *Factory) CreateTestPresenter(function model.Function) (TestPresenter, e
 	functionType := domain.GetFunctionType(function)
 
 	switch functionType {
-	case domain.TypePublicMethodWithInterfaceDeps:
+	case domain.TypeMethodWithInterfaceDeps:
 		return f.getPresenterMethodWithMocks(), nil
-	case domain.TypePublicMethodWithoutInterfaceDeps:
+	case domain.TypeMethodWithoutInterfaceDeps:
 		return f.getPresenterMethodWithoutMocks(), nil
-	case domain.TypePublicFunction:
+	case domain.TypeFunction:
 		return f.getPresenterFunction(), nil
 	}
 

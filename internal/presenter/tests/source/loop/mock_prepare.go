@@ -15,7 +15,7 @@ func NewMockPrepare() *MockPrepare {
 }
 
 func (s *MockPrepare) Extend(function model.Function) func(loop *presenter.Loop) {
-	rows := []string{s.getPrepareFunctionCall(function)}
+	rows := s.getPrepareFunctionCall(function)
 	rows = append(rows, s.getMocksWithExpect(function)...)
 
 	return func(loop *presenter.Loop) {
@@ -23,9 +23,8 @@ func (s *MockPrepare) Extend(function model.Function) func(loop *presenter.Loop)
 	}
 }
 
-func (s *MockPrepare) getPrepareFunctionCall(function model.Function) string {
+func (s *MockPrepare) getPrepareFunctionCall(function model.Function) []string {
 	mocks := make([]string, 0)
-
 	for _, dependency := range function.Receiver.Dependencies {
 		if dependency.Interface == nil || dependency.IsMetric() || dependency.IsGrace() || dependency.IsLogger() {
 			continue
@@ -34,7 +33,12 @@ func (s *MockPrepare) getPrepareFunctionCall(function model.Function) string {
 		mocks = append(mocks, getMockName(dependency))
 	}
 
-	return fmt.Sprintf("tc.prepare(%s)", strings.Join(mocks, ", "))
+	rows := make([]string, 0)
+	rows = append(rows, "if tc.prepare != nil {")
+	rows = append(rows, fmt.Sprintf("\ttc.prepare(%s)", strings.Join(mocks, ", ")))
+	rows = append(rows, "}")
+
+	return rows
 }
 
 func (s *MockPrepare) getMocksWithExpect(function model.Function) []string {

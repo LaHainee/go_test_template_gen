@@ -3,8 +3,6 @@ package field
 import (
 	"fmt"
 	"go/ast"
-
-	"github.com/LaHainee/go_test_template_gen/internal/util/pointer"
 )
 
 func GetNames(field *ast.Field) []string {
@@ -25,13 +23,41 @@ func GetNames(field *ast.Field) []string {
 	return names
 }
 
-func GetPackage(field *ast.Field) *string {
+func GetPackages(field *ast.Field, packages []string) []string {
 	switch t := field.Type.(type) {
-	case *ast.SelectorExpr:
-		return pointer.To(fmt.Sprintf("%s", t.X))
-	}
+	case *ast.Ident:
+		return packages
+	case *ast.ArrayType:
+		return append(packages, GetPackages(&ast.Field{Type: t.Elt}, packages)...)
+	case *ast.StarExpr:
+		return append(packages, GetPackages(&ast.Field{Type: t.X}, packages)...)
+	case *ast.MapType:
+		packagesKey := GetPackages(&ast.Field{Type: t.Key}, packages)
+		packagesValue := GetPackages(&ast.Field{Type: t.Value}, packages)
 
-	return nil
+		packages = append(packages, packagesKey...)
+		packages = append(packages, packagesValue...)
+
+		return packages
+	case *ast.SelectorExpr:
+		return append(packages, fmt.Sprint(t.X))
+	case *ast.FuncType:
+		if t.Params != nil && len(t.Params.List) > 0 {
+			for _, param := range t.Params.List {
+				packages = append(packages, GetPackages(&ast.Field{Type: param.Type}, packages)...)
+			}
+		}
+
+		if t.Results != nil && len(t.Results.List) > 0 {
+			for _, result := range t.Results.List {
+				packages = append(packages, GetPackages(&ast.Field{Type: result.Type}, packages)...)
+			}
+		}
+
+		return packages
+	default:
+		return packages
+	}
 }
 
 func GetType(field *ast.Field) string {

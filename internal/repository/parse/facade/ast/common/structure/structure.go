@@ -42,7 +42,7 @@ func getDependencies(structType *ast.StructType, file *ast.File) []model.Depende
 		dependency := model.Dependency{
 			Name:      names[0],
 			Type:      field.GetType(f),
-			Package:   field.GetPackage(f),
+			Packages:  field.GetPackages(f, []string{}),
 			Interface: interfaces.Get(f, file),
 		}
 

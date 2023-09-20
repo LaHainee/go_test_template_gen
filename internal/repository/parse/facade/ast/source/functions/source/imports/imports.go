@@ -1,7 +1,6 @@
 package imports
 
 import (
-	"errors"
 	"go/ast"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
@@ -42,16 +41,11 @@ func (s *Source) importsForFunctionReceiverFields(file *model.File, function *mo
 	}
 
 	for _, dependency := range function.Receiver.Dependencies {
-		if dependency.Package == nil {
+		if len(dependency.Packages) == 0 {
 			continue
 		}
 
-		importPath, err := file.Imports.Search(*dependency.Package)
-		if errors.Is(err, model.ErrNotFound) {
-			continue
-		}
-
-		imports = append(imports, importPath)
+		imports = append(imports, getUsedImports(file.Imports, dependency.Packages)...)
 	}
 
 	return imports
@@ -62,26 +56,29 @@ func (s *Source) importsForFunctionArgs(file *model.File, function *model.Functi
 
 	// Для входных аргументов
 	for _, argument := range function.InputArguments {
-		if argument.Package == nil {
+		if len(argument.Packages) == 0 {
 			continue
 		}
-
-		importPath, err := file.Imports.Search(*argument.Package)
-		if errors.Is(err, model.ErrNotFound) {
-			continue
-		}
-
-		imports = append(imports, importPath)
+		imports = append(imports, getUsedImports(file.Imports, argument.Packages)...)
 	}
 
 	// Аналогично для выходных
 	for _, argument := range function.OutputArguments {
-		if argument.Package == nil {
+		if argument.Packages == nil {
 			continue
 		}
+		imports = append(imports, getUsedImports(file.Imports, argument.Packages)...)
+	}
 
-		importPath, err := file.Imports.Search(*argument.Package)
-		if errors.Is(err, model.ErrNotFound) {
+	return imports
+}
+
+func getUsedImports(fileImports model.Imports, packages []string) []string {
+	imports := make([]string, 0)
+
+	for _, pkg := range packages {
+		importPath, err := fileImports.Search(pkg)
+		if err != nil {
 			continue
 		}
 

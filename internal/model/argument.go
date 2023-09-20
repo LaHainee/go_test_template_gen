@@ -10,9 +10,9 @@ const (
 )
 
 type Argument struct {
-	Name    *string
-	Type    string
-	Package *string
+	Name     *string
+	Type     string
+	Packages []string
 }
 
 func (argument Argument) IsPointer() bool {
