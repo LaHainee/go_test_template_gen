@@ -31,7 +31,7 @@ func (s *MockCreate) Extend(function model.Function) func(loop *test.Loop) {
 		}
 
 		statements = append(statements, test.Statement{
-			Lhs: getMockName(dependency),
+			Lhs: MockName(dependency),
 			Rhs: fmt.Sprintf("NewMock%s(ctrl)", dependency.Type),
 		})
 	}

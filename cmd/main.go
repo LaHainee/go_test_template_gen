@@ -10,6 +10,7 @@ import (
 	astFunctionArguments "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/arguments"
 	astFunctionImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/imports"
 	astFunctionReceiver "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/receiver"
+	astFunctionReturning "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/returning"
 	astImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/imports"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/file"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/test/create"
@@ -33,8 +34,10 @@ func main() {
 	functionSourceReceiver := astFunctionReceiver.NewSource()
 	functionSourceArguments := astFunctionArguments.NewSource()
 	functionSourceImports := astFunctionImports.NewSource()
+	functionSourceReturning := astFunctionReturning.NewSource()
 	functionSourceReceiver.SetNext(functionSourceArguments)
 	functionSourceArguments.SetNext(functionSourceImports)
+	functionSourceImports.SetNext(functionSourceReturning)
 
 	sourceFunctions := astFunctions.NewSource(functionSourceReceiver)
 	sourceImports := astImports.NewSource()

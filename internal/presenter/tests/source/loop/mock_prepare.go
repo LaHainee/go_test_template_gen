@@ -30,7 +30,7 @@ func (s *MockPrepare) getPrepareFunctionCall(function model.Function) []string {
 			continue
 		}
 
-		mocks = append(mocks, getMockName(dependency))
+		mocks = append(mocks, MockName(dependency))
 	}
 
 	rows := make([]string, 0)
@@ -69,7 +69,7 @@ func (s *MockPrepare) getMockWithExpect(dependency model.Dependency, function mo
 
 	return fmt.Sprintf(
 		"%s.EXPECT().%s(%s).AnyTimes()",
-		getMockName(dependency),
+		MockName(dependency),
 		function.Name,
 		strings.Join(gomockAnyCalls, ", "),
 	)

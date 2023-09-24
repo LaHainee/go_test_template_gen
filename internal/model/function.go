@@ -9,10 +9,10 @@ type Function struct {
 	Name            string
 	Receiver        *Structure
 	NeededImports   Imports
+	Return          *Return
 	InputArguments  []Argument
 	OutputArguments []Argument
 }
-type Functions []Function
 
 func (function Function) HasInterfaceDependencies() bool {
 	if function.Receiver == nil {
@@ -36,22 +36,8 @@ func (function Function) IsConstructor() bool {
 	return strings.HasPrefix(function.Name, "New")
 }
 
-// LookupByOutputArgument - найти функцию, которая возвращает аргумент с полученным типом
-func (functions Functions) LookupByOutputArgument(argumentType string) (Function, error) {
-	for _, function := range functions {
-		for _, argument := range function.OutputArguments {
-			// Аргумент может быть указателем, поэтому необходимо его разименовать
-			if argument.Dereference() == argumentType {
-				return function, nil
-			}
-		}
-	}
-
-	return Function{}, ErrNotFound
-}
-
 type Structure struct {
-	Name            string
-	ConstructorName *string
-	Dependencies    []Dependency
+	Name         string
+	Constructor  *Function
+	Dependencies []Dependency
 }

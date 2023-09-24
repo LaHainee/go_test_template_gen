@@ -7,7 +7,7 @@ import (
 	"github.com/LaHainee/go_test_template_gen/internal/model"
 )
 
-func getMockName(dependency model.Dependency) string {
+func MockName(dependency model.Dependency) string {
 	return fmt.Sprintf("mock%s", capitalizeFirst(dependency.Type))
 }
 

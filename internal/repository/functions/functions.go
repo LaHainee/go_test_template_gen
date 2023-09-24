@@ -2,6 +2,7 @@ package functions
 
 import (
 	"errors"
+	"github.com/LaHainee/go_test_template_gen/internal/util/pointer"
 	"go/ast"
 	"go/parser"
 	"go/scanner"
@@ -64,12 +65,11 @@ func isCalled(function model.Function, file *ast.File) bool {
 			var foundConstructor bool // найден ли вызов конструктора
 
 			var constructorName *string
-			if function.Receiver != nil {
-				constructorName = function.Receiver.ConstructorName
+			if function.Receiver != nil && function.Receiver.Constructor != nil {
+				constructorName = pointer.To(function.Receiver.Constructor.Name)
 			}
 
 			if constructorName == nil {
-				// Если у функции нет ресивера, то по умолчанию считаем, что вызов конструктора найден
 				foundConstructor = true
 			}
 
