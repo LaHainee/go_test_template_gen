@@ -7,6 +7,7 @@ import (
 	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/loop"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/structure"
 	sourceLoop "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/loop"
+	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/loop/instance_create"
 	sourceStructure "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/structure"
 )
 
@@ -88,7 +89,7 @@ func (f *Factory) mustInitPresenterMethodWithoutMocks() {
 			sourceStructure.NewExpectation(),
 		),
 		loop.NewPresenter(
-			sourceLoop.NewInstanceCreate(),
+			instance_create.NewInstanceCreate(),
 			sourceLoop.NewFunctionCall(),
 			sourceLoop.NewExpectationCall(),
 		),
@@ -106,7 +107,7 @@ func (f *Factory) mustInitPresenterMethodWithMocks() {
 		loop.NewPresenter(
 			sourceLoop.NewMockCreate(),
 			sourceLoop.NewMockPrepare(),
-			sourceLoop.NewInstanceCreate(),
+			instance_create.NewInstanceCreate(),
 			sourceLoop.NewFunctionCall(),
 			sourceLoop.NewExpectationCall(),
 		),

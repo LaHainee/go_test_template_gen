@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/LaHainee/go_test_template_gen/internal/model"
-	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/file/functions"
 )
 
 type Parser struct {
@@ -37,7 +36,7 @@ func (p *Parser) ParseDirectory(directoryPath model.FilePath) ([]model.File, err
 
 	// Приходится вызывать после того как спарсили все файлы, поскольку конструктор может быть объявлен в другом файле,
 	// который еще не спаршен
-	functions.SetConstructors(files)
+	bindConstructorsToReceivers(files)
 
 	return files, nil
 }

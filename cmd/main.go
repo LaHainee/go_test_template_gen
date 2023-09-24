@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/functions"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
@@ -10,6 +9,7 @@ import (
 	astFunctionArguments "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/arguments"
 	astFunctionImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/imports"
 	astFunctionReceiver "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/receiver"
+	astFunctionReturning "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/functions/source/returning"
 	astImports "github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast/source/imports"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/file"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/test/create"
@@ -20,21 +20,26 @@ import (
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files"
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files/by_dirpath"
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files/by_filepath"
+	"github.com/LaHainee/go_test_template_gen/internal/util/pointer"
 )
 
 func main() {
-	path := flag.String("path", "", "Path to file or directory for test template generation")
-	flag.Parse()
+	path := pointer.To("/Users/vaershov/AvitoDev/service-str-quality/internal/usecase/item_quality/calculate")
 
-	if path == nil {
-		return
-	}
+	//path := flag.String("path", "", "Path to file or directory for test template generation")
+	//flag.Parse()
+	//
+	//if path == nil {
+	//	return
+	//}
 
 	functionSourceReceiver := astFunctionReceiver.NewSource()
 	functionSourceArguments := astFunctionArguments.NewSource()
 	functionSourceImports := astFunctionImports.NewSource()
+	functionSourceReturning := astFunctionReturning.NewSource()
 	functionSourceReceiver.SetNext(functionSourceArguments)
 	functionSourceArguments.SetNext(functionSourceImports)
+	functionSourceImports.SetNext(functionSourceReturning)
 
 	sourceFunctions := astFunctions.NewSource(functionSourceReceiver)
 	sourceImports := astImports.NewSource()
