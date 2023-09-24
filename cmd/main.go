@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/functions"
 	"github.com/LaHainee/go_test_template_gen/internal/repository/parse/facade/ast"
@@ -20,18 +21,15 @@ import (
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files"
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files/by_dirpath"
 	"github.com/LaHainee/go_test_template_gen/internal/usecase/codegen/files/by_filepath"
-	"github.com/LaHainee/go_test_template_gen/internal/util/pointer"
 )
 
 func main() {
-	path := pointer.To("/Users/vaershov/AvitoDev/service-str-quality/internal/usecase/item_quality/calculate")
+	path := flag.String("path", "", "Path to file or directory for test template generation")
+	flag.Parse()
 
-	//path := flag.String("path", "", "Path to file or directory for test template generation")
-	//flag.Parse()
-	//
-	//if path == nil {
-	//	return
-	//}
+	if path == nil {
+		return
+	}
 
 	functionSourceReceiver := astFunctionReceiver.NewSource()
 	functionSourceArguments := astFunctionArguments.NewSource()
