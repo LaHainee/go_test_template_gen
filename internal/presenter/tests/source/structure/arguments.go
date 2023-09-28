@@ -13,12 +13,6 @@ func NewArguments() *Arguments {
 }
 
 func (s *Arguments) Extend(function model.Function) func(structure *test.Structure) {
-	if len(function.InputArguments) == 0 {
-		return func(structure *test.Structure) {
-			structure.FunctionArguments = []test.Statement{}
-		}
-	}
-
 	declarations := make([]test.Statement, 0)
 	declarations = append(declarations, s.getInputArgumentsDeclarations(function)...)
 	declarations = append(declarations, s.getNonInterfaceDependenciesDeclarations(function)...)

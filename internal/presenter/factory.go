@@ -4,6 +4,7 @@ import (
 	domain "github.com/LaHainee/go_test_template_gen/internal/domain/function"
 	"github.com/LaHainee/go_test_template_gen/internal/model"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter"
+	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/imports"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/loop"
 	"github.com/LaHainee/go_test_template_gen/internal/presenter/tests/presenter/structure"
 	sourceLoop "github.com/LaHainee/go_test_template_gen/internal/presenter/tests/source/loop"
@@ -77,6 +78,7 @@ func (f *Factory) mustInitPresenterFunction() {
 			sourceLoop.NewFunctionCall(),
 			sourceLoop.NewExpectationCall(),
 		),
+		imports.NewWithOutMock(),
 	)
 }
 
@@ -93,6 +95,7 @@ func (f *Factory) mustInitPresenterMethodWithoutMocks() {
 			sourceLoop.NewFunctionCall(),
 			sourceLoop.NewExpectationCall(),
 		),
+		imports.NewWithOutMock(),
 	)
 }
 
@@ -111,5 +114,6 @@ func (f *Factory) mustInitPresenterMethodWithMocks() {
 			sourceLoop.NewFunctionCall(),
 			sourceLoop.NewExpectationCall(),
 		),
+		imports.NewWithMock(),
 	)
 }
