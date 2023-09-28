@@ -11,3 +11,7 @@ type structurePresenter interface {
 type loopPresenter interface {
 	Present(function model.Function) string
 }
+
+type importsGetter interface {
+	Get(function model.Function) []string
+}
