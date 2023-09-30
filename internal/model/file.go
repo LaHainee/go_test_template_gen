@@ -1,10 +1,11 @@
 package model
 
 type File struct {
-	Path      FilePath
-	Imports   Imports
-	Package   Package
-	Functions []Function
+	Path        FilePath
+	ProjectName string
+	Imports     Imports
+	Package     Package
+	Functions   []Function
 }
 
 type Package struct {

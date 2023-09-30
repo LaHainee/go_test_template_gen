@@ -28,13 +28,19 @@ func (s *Source) SetNext(next facade.Source) {
 }
 
 func (s *Source) Extend(filePath model.FilePath, astFile *ast.File, file *model.File) error {
-	pkg, err := getPackage(string(filePath), astFile)
+	projectRootPath, err := getProjectRootPath(filePath.String())
+	if err != nil {
+		return err
+	}
+
+	pkg, err := getPackage(filePath, projectRootPath, astFile)
 	if err != nil {
 		return err
 	}
 
 	file.Path = filePath
 	file.Package = pkg
+	file.ProjectName = projectRootPath.Base()
 
 	if s.next != nil {
 		return s.next.Extend(filePath, astFile, file)
@@ -42,22 +48,13 @@ func (s *Source) Extend(filePath model.FilePath, astFile *ast.File, file *model.
 	return nil
 }
 
-func getPackage(filePath string, file *ast.File) (model.Package, error) {
-	if file.Name == nil {
-		return model.Package{}, errors.New("corrupted file")
-	}
-
-	projectRootPath, err := getProjectRootPath(filePath)
+func getPackage(filePath, rootPath model.FilePath, file *ast.File) (model.Package, error) {
+	packagePath, err := getPackagePath(rootPath.String(), filePath.String())
 	if err != nil {
 		return model.Package{}, err
 	}
 
-	packagePath, err := getPackagePath(projectRootPath, filePath)
-	if err != nil {
-		return model.Package{}, err
-	}
-
-	projectModuleName, err := getProjectModuleName(projectRootPath)
+	projectModuleName, err := getProjectModuleName(rootPath.String())
 	if err != nil {
 		return model.Package{}, err
 	}
@@ -131,7 +128,7 @@ getProjectRootPath – получить путь к корню проекта. �
 
 Например /User/vaershov/Desktop/work/service-str-activator/
 */
-func getProjectRootPath(filePath string) (string, error) {
+func getProjectRootPath(filePath string) (model.FilePath, error) {
 	for {
 		if filePath == "/" {
 			return "", errors.New("file go.mod not found")
@@ -159,7 +156,7 @@ func getProjectRootPath(filePath string) (string, error) {
 		}
 
 		if rootPath != "" {
-			return rootPath, nil
+			return model.FilePath(rootPath), nil
 		}
 	}
 }

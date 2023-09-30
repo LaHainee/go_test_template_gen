@@ -13,7 +13,7 @@ const template = `func %s(t *testing.T) {
 	tests := []struct {
 		%s
 	}{
-		{},
+		%s
 	}
 
 	for _, tc := range tests {
@@ -57,7 +57,7 @@ func (p *Presenter) Present(files []model.File) []model.TestFile {
 
 func (p *Presenter) presentFile(file model.File) (model.TestFile, error) {
 	imports := model.NewImports().SetProjectModuleName(file.Package.ProjectModuleName)
-	imports = imports.Append(getSelfImport(file.Package.Path)) // селф-импорт
+	imports = imports.Append(fmt.Sprintf(". \"%s\"", file.Package.Path)) // селф-импорт
 
 	tests := make([]model.Test, 0, len(file.Functions))
 	for _, function := range file.Functions {
@@ -69,7 +69,7 @@ func (p *Presenter) presentFile(file model.File) (model.TestFile, error) {
 		imports = imports.Append(function.NeededImports.Get()...)       // импорты, которые нужны для функции
 		imports = imports.Append(presenter.PresentImports(function)...) // импорты, которые нужны для теста
 
-		tests = append(tests, getTest(function, presenter))
+		tests = append(tests, getTest(file, function, presenter))
 	}
 
 	if len(tests) == 0 {
@@ -77,39 +77,34 @@ func (p *Presenter) presentFile(file model.File) (model.TestFile, error) {
 	}
 
 	return model.TestFile{
-		Path:    file.Path.ToTest().String(),
-		Package: getPackage(file),
+		Path: file.Path.ToTest().String(),
+		Package: model.Package{
+			Name:              fmt.Sprintf("%s_test", file.Package.Name),
+			ProjectModuleName: file.Package.ProjectModuleName,
+		},
 		Imports: imports,
 		Tests:   tests,
 	}, nil
 }
 
-func getTest(function model.Function, presenter TestPresenter) model.Test {
-	testName := getTestName(function)
-	sourceStructure := presenter.PresentStructure(function)
-	sourceLoop := presenter.PresentLoop(function)
+func getTest(file model.File, function model.Function, presenter TestPresenter) model.Test {
+	testName := fmt.Sprintf("Test%s", function.Name)
+
+	if function.Receiver != nil {
+		testName = fmt.Sprintf("Test%s_%s", function.Receiver.Name, function.Name)
+	}
+
+	presentedStructure := presenter.PresentStructure(function)
+	presentedLoop := presenter.PresentLoop(function)
 
 	return model.Test{
-		Name:   testName,
-		Source: fmt.Sprintf(template, testName, sourceStructure, sourceLoop),
+		Name: testName,
+		Source: fmt.Sprintf(
+			template,
+			testName,
+			presentedStructure,
+			presentTestcase(file),
+			presentedLoop,
+		),
 	}
-}
-
-func getPackage(file model.File) model.Package {
-	return model.Package{
-		Name:              fmt.Sprintf("%s_test", file.Package.Name),
-		ProjectModuleName: file.Package.ProjectModuleName,
-	}
-}
-
-func getTestName(function model.Function) string {
-	if function.Receiver == nil {
-		return fmt.Sprintf("Test%s", function.Name)
-	}
-
-	return fmt.Sprintf("Test%s_%s", function.Receiver.Name, function.Name)
-}
-
-func getSelfImport(packagePath string) string {
-	return fmt.Sprintf(". \"%s\"", packagePath)
 }
