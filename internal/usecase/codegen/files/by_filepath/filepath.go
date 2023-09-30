@@ -16,7 +16,7 @@ func NewSource(fp fileParser) *Source {
 
 func (s *Source) Get(path model.FilePath) ([]model.File, error) {
 	// Приходится парсить целиком директорию, поскольку объявления могут лежать в разных
-	files, err := s.file.ParseDirectory(model.FilePath(path.DirectoryPath()))
+	files, err := s.file.ParseDirectory(model.FilePath(path.Dir()))
 	if err != nil {
 		return nil, err
 	}

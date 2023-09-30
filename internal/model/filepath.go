@@ -10,23 +10,23 @@ import (
 type FilePath string
 
 func (path FilePath) ToTest() FilePath {
-	return FilePath(fmt.Sprintf("%s/%s_test.go", path.DirectoryPath(), path.FileNameWithoutExtension()))
+	return FilePath(fmt.Sprintf("%s/%s_test.go", path.Dir(), path.FileNameWithoutExtension()))
 }
 
 func (path FilePath) String() string {
 	return string(path)
 }
 
-func (path FilePath) DirectoryPath() string {
+func (path FilePath) Dir() string {
 	return filepath.Dir(path.String())
 }
 
-func (path FilePath) FileName() string {
+func (path FilePath) Base() string {
 	return filepath.Base(path.String())
 }
 
 func (path FilePath) FileNameWithoutExtension() string {
-	filename := path.FileName()
+	filename := path.Base()
 	extension := filepath.Ext(path.String())
 
 	return filename[:len(filename)-len(extension)]
