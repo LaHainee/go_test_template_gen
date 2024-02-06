@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	. "go.avito.ru/str/service-str-quality/internal/gateway/item_aggregator"
