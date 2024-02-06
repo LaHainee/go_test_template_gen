@@ -9,7 +9,7 @@ func NewWithMock() *WithMock {
 }
 
 func (i *WithMock) Get(function model.Function) []string {
-	importsList := append(defaultImportsList, "\"github.com/golang/mock/gomock\"")
+	importsList := append(defaultImportsList, "\"go.uber.org/mock/gomock\"")
 
 	if function.Receiver == nil {
 		return importsList
