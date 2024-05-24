@@ -14,6 +14,9 @@ var tmsProjectToTagID = map[string]string{
 	"service-str-notifier":          "19045",
 	"service-str-quality":           "19636",
 	"service-str-admin-composition": "19637",
+	"service-str-booking-storage":   "23852",
+	"service-str-booking-gateway":   "24249",
+	"service-calendar-platform":     "23901",
 }
 
 func presentTestcase(file model.File) string {
